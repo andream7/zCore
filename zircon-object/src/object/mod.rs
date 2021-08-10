@@ -113,7 +113,7 @@ pub use {super::*, handle::*, rights::*, signal::*};
 mod handle;
 mod rights;
 mod signal;
-
+ 
 /// Common interface of a kernel object.
 ///
 /// Implemented by [`impl_kobject`] macro.
@@ -432,6 +432,8 @@ pub fn wait_signal_many(
 #[macro_export]
 macro_rules! impl_kobject {
     ($class:ident $( $fn:tt )*) => {
+        /// Implement the KernelObject trait for the object, 
+        /// and forward the method directly to the internal struct
         impl KernelObject for $class {
             fn id(&self) -> KoID {
                 self.base.id
@@ -439,6 +441,8 @@ macro_rules! impl_kobject {
             fn type_name(&self) -> &str {
                 stringify!($class)
             }
+            /// The type in the macro should write the full path.
+            /// such as alloc::string::String
             fn name(&self) -> alloc::string::String {
                 self.base.name()
             }
@@ -462,6 +466,7 @@ macro_rules! impl_kobject {
             }
             $( $fn )*
         }
+        /// Implement the Debug trait for the object
         impl core::fmt::Debug for $class {
             fn fmt(
                 &self,
@@ -506,6 +511,7 @@ pub type SignalHandler = Box<dyn Fn(Signal) -> bool + Send>;
 
 /// Empty kernel object. Just for test.
 pub struct DummyObject {
+    /// all kernel object must contain a `KObjectBase` named `base`
     base: KObjectBase,
 }
 
